@@ -1,4 +1,4 @@
-name: Criar APK Lotofacil
+name: Criar APK (Correção Python)
 
 on:
   push:
@@ -7,26 +7,40 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Baixar Código
         uses: actions/checkout@v3
 
-      # --- A CORREÇÃO ESTÁ AQUI EMBAIXO ---
-      - name: Configurar Java 11 (Obrigatório para Android)
+      # 1. Configurar Java 11 (Essencial)
+      - name: Configurar Java 11
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '11'
 
+      # 2. Instalar TODAS as dependências do Python (O Segredo)
       - name: Instalar Dependências do Sistema
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip build-essential git python3 python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libgstreamer1.0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good libltdl-dev libffi-dev libssl-dev autoconf libtool automake
+          sudo apt-get install -y \
+            build-essential git python3 python3-dev python3-pip \
+            ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev \
+            libgstreamer1.0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+            libltdl-dev libffi-dev libssl-dev autoconf libtool automake \
+            libsqlite3-dev sqlite3 libbz2-dev libncurses5-dev libgdbm-dev liblzma-dev tk-dev uuid-dev unzip zip
+          
           pip3 install --upgrade pip
           pip3 install buildozer cython==0.29.33
 
+      # 3. Limpeza Profunda (Garante que não use arquivos corrompidos da tentativa anterior)
+      - name: Limpar Builds Antigos
+        run: |
+          rm -rf .buildozer
+          yes | buildozer android clean
+
+      # 4. Construir APK
       - name: Construir APK
         run: |
           yes | buildozer android debug
